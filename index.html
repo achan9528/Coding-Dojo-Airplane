@@ -88,7 +88,9 @@
 					name: "enemy" + (i + 1),
 					type: "enemy" + randomNumber(1,2),
 					x: i,
-					y: 0
+					y: 0,
+					status: "fighting",
+					move_size: .25 * randomNumber(.5,1.5)
 				})
 			}
 
@@ -112,17 +114,39 @@
 		}
 
 		function drawEnemies(){
-			for (var i = 0; i < enemies.length; i++){
-				document.getElementById('enemy' + (i+1)).style.left = (enemies[i].x * 70) + "px";
-				document.getElementById('enemy' + (i+1)).style.top = (enemies[i].y * 75) + "px";
+			if (enemies.length > 0){
+				for (var i = 0; i < enemies.length; i++){
+					document.getElementById('enemy' + (i+1)).style.left = (enemies[i].x * 70) + "px";
+					document.getElementById('enemy' + (i+1)).style.top = (enemies[i].y * 75) + "px";
+				}
 			}
 		}
 
 		function drawHeroes(){
 			for (var i = 0; i < heroes.length; i++){
 				document.getElementById('hero' + (i+1)).style.left = (heroes[i].x * 70) + "px";
-				document.getElementById('hero' + (i+1)).style.top = (487.5 - (heroes[i].y * 75)) + "px";
+				document.getElementById('hero' + (i+1)).style.top = (500 - (heroes[i].y * 75)) + "px";
 			}
+		}
+
+		function moveEnemies(){
+			for (var i = 0; i < enemies.length; i++){
+				// enemies[i].y += enemies[i].move_size;
+				enemies[i].y += enemies[i].move_size;
+				if (enemies[i].y >= (500/70)){
+					enemies[i].status = "destroyed";
+					document.getElementById(enemies[i].name).remove();
+				}
+			}
+
+			var replacement_array = [];
+			for (var i = 0; i < enemies.length; i++){
+				if (enemies[i].status == "fighting"){
+					replacement_array.push(enemies[i]);
+				}
+			}
+			enemies = replacement_array;
+			console.log(enemies);
 		}
 
 		document.onkeydown = function(e){
@@ -134,37 +158,54 @@
 				40: 'down'
 			};
 
+			var move_size_x = .25;
+			var move_size_y = .25;
 			var dir = moveDict[e.keyCode];
 			console.log(dir);
 			
 			if (dir == 'left' || dir == 'right' || dir == 'up' || dir == 'down'){e.preventDefault();}
 			if (dir == 'left'){
-				for (var i = 0; i < heroes.length; i++){
-					heroes[i].x--;
+				if (heroes[0].x != 0){
+					for (var i = 0; i < heroes.length; i++){
+						heroes[i].x -= move_size_x;
+					}
 				}
 			} else if (dir == 'right'){
-				for (var i = 0; i < heroes.length; i++){
-					heroes[i].x++;
+				if (heroes[heroes.length - 1].x != Math.floor((screen.width) / 75)){
+					for (var i = 0; i < heroes.length; i++){
+						heroes[i].x += move_size_x;
+					}
 				}
 			} else if (dir == 'up'){
-				for (var i = 0; i < heroes.length; i++){
-					heroes[i].y++;
+				if (heroes[0].y != (Math.floor((500 / 3) / 75))){
+					for (var i = 0; i < heroes.length; i++){
+						heroes[i].y += move_size_y;
+					}
 				}
 			} else if (dir == 'down'){
-				for (var i = 0; i < heroes.length; i++){
-					heroes[i].y--;
+				if (heroes[0].y != 0){
+					for (var i = 0; i < heroes.length; i++){
+						heroes[i].y -= move_size_y;
+					}
 				}
 			}
 
 			drawHeroes();
+			console.log(heroes[0]);
+		}
+
+		function gameLoop(){
+			moveEnemies();
+			drawEnemies();
+			setTimeout(gameLoop, 1000);
 		}
 
 		drawWorld();
 		initEnemies();
-		drawEnemies();
 		initPlayer();
 		drawHeroes();
-		console.log(enemies);
+		drawEnemies();
+		gameLoop();
 	</script>	
 </body>
 </html>
