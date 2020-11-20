@@ -49,6 +49,12 @@
 			height: 75px;
 			background-size:cover;
 		}
+		.missile1{
+			background-color:red;
+			width: 2.5px;
+			height: 10px;
+			position: absolute;
+		}
 	</style>
 
 </head>
@@ -56,6 +62,7 @@
 
 	<div id = 'ocean'>
 		<div id = 'player'></div>
+		<div id = 'missiles'></div>
 		<div id = 'enemies'></div>
 	</div>
 
@@ -75,9 +82,10 @@
 		
 		var enemies = [];
 
+		var missiles = [];
+
 		function drawWorld(){
 			var background_number = randomNumber(1,2);
-			console.log(background_number);
 			document.getElementById('ocean').style.backgroundImage = "url('./img/ocean" + background_number + ".jpg')";
 		}
 
@@ -114,40 +122,71 @@
 		}
 
 		function drawEnemies(){
+			var e_width;
+			var e_height;
 			if (enemies.length > 0){
 				for (var i = 0; i < enemies.length; i++){
-					document.getElementById('enemy' + (i+1)).style.left = (enemies[i].x * 70) + "px";
-					document.getElementById('enemy' + (i+1)).style.top = (enemies[i].y * 75) + "px";
+					e_width = document.getElementById(enemies[i].name).clientWidth;
+					e_height = document.getElementById(enemies[i].name).clientHeight;
+					console.log(e_width);
+					document.getElementById(enemies[i].name).style.left = (enemies[i].x * e_width) + "px";
+					document.getElementById(enemies[i].name).style.top = (enemies[i].y * e_height) + "px";
 				}
 			}
 		}
 
 		function drawHeroes(){
+			var h_width;
+			var h_height;
 			for (var i = 0; i < heroes.length; i++){
-				document.getElementById('hero' + (i+1)).style.left = (heroes[i].x * 70) + "px";
-				document.getElementById('hero' + (i+1)).style.top = (500 - (heroes[i].y * 75)) + "px";
+				h_width = document.getElementById(heroes[i].name).clientWidth;
+				h_height = document.getElementById(heroes[i].name).clientHeight;
+				document.getElementById(heroes[i].name).style.left = (heroes[i].x * h_width) + "px";
+				document.getElementById(heroes[i].name).style.top = (500 - (heroes[i].y * h_height)) + "px";
+			}
+		}
+
+		function drawMissiles(){
+			var m_size;
+			for (var i = 0; i < missiles.length; i++){
+				m_size = document.getElementById(missiles[i].name).clientHeight;
+				console.log(m_size);
+				document.getElementById(missiles[i].name).style.left = (missiles[i].x * 70) + (75/2) + "px";
+				document.getElementById(missiles[i].name).style.top = (500 - ((missiles[i].y * 75) - m_size)) + "px";
 			}
 		}
 
 		function moveEnemies(){
+			var replacement_array = [];
 			for (var i = 0; i < enemies.length; i++){
 				// enemies[i].y += enemies[i].move_size;
 				enemies[i].y += enemies[i].move_size;
 				if (enemies[i].y >= (500/70)){
 					enemies[i].status = "destroyed";
 					document.getElementById(enemies[i].name).remove();
-				}
-			}
-
-			var replacement_array = [];
-			for (var i = 0; i < enemies.length; i++){
-				if (enemies[i].status == "fighting"){
+				} else {
 					replacement_array.push(enemies[i]);
 				}
 			}
 			enemies = replacement_array;
-			console.log(enemies);
 		}
+
+		function moveMissiles(){
+			var replacement_array = [];
+			for (var i = 0; i < missiles.length; i++){
+				// enemies[i].y += enemies[i].move_size;
+				missiles[i].y += missiles[i].move_size;
+				if (missiles[i].y > (500/75)){
+					missiles[i].status = "gone";
+					document.getElementById(missiles[i].name).remove();
+				} else {
+					replacement_array.push(missiles[i]);
+				}
+			}
+
+			missiles = replacement_array;
+		}
+
 
 		document.onkeydown = function(e){
 			// make the ninja walk
@@ -155,15 +194,15 @@
 				37: 'left',
 				38: 'up',
 				39: 'right',
-				40: 'down'
+				40: 'down',
+				32: 'shoot'
 			};
 
 			var move_size_x = .25;
 			var move_size_y = .25;
 			var dir = moveDict[e.keyCode];
-			console.log(dir);
 			
-			if (dir == 'left' || dir == 'right' || dir == 'up' || dir == 'down'){e.preventDefault();}
+			if (dir == 'left' || dir == 'right' || dir == 'up' || dir == 'down' || dir == 'shoot'){e.preventDefault();}
 			if (dir == 'left'){
 				if (heroes[0].x != 0){
 					for (var i = 0; i < heroes.length; i++){
@@ -188,16 +227,30 @@
 						heroes[i].y -= move_size_y;
 					}
 				}
+			} else if (dir == 'shoot'){
+				missiles.push({
+					name: 'missile' + (missiles.length + 1),
+					type: 'missile1',
+					x: heroes[0].x,
+					y: heroes[0].y,
+					move_size: .5,
+					stats: 'shot'
+				});
+				
+				document.getElementById('missiles').innerHTML += "<div id = missile" + (missiles.length) + " class = missile1></div>";
+				drawMissiles();
+				
 			}
 
 			drawHeroes();
-			console.log(heroes[0]);
 		}
 
 		function gameLoop(){
 			moveEnemies();
 			drawEnemies();
-			setTimeout(gameLoop, 1000);
+			moveMissiles();
+			drawMissiles();
+			setTimeout(gameLoop, 100);
 		}
 
 		drawWorld();
