@@ -3,28 +3,51 @@
 <head>
 	<title>Airplane!</title>
 	<style type="text/css">
-		body{
+		/* body{
 			background-image: url('./img/ocean.jpg');
 			width:100%;
 			height:100%;
-		}
+		} */
 		#ocean{
-			/* background-image: url('./img/ocean.jpg');
+			background-image: url('./img/ocean.jpg');
 			width: 100%;
-			height: 600px; */
+			height: 600px;
 			display:inline-block;
+			left: 0px;
+			top: 0px;
+			position:absolute;
 		}
-		.hero{
-			background-image: url('./img/player.png');
+		.hero1{
+			background-image: url('./img/player1.png');
+			position:absolute;
+			width: 70px;
+			height: 75px;
+			background-position: center;
+		}
+		.hero2{
+			background-image: url('./img/player2.png');
+			background-size: cover;
+			background-repeat: no-repeat;
+			background-position:center;
 			position:absolute;
 			width: 70px;
 			height: 75px;
 		}
 		.enemy1{
-			background-image: url('./img/enemy.png');
+			background-image: url('./img/enemy1.png');
 			position: absolute;
 			width: 70px;
 			height: 75px;
+		}
+		.enemy2{
+			background-image: url('./img/enemy2.png');
+			background-repeat: no-repeat;
+			background-position:center;
+			background-size: cover;
+			position: absolute;
+			width: 70px;
+			height: 75px;
+			background-size:cover;
 		}
 	</style>
 
@@ -52,12 +75,18 @@
 		
 		var enemies = [];
 
+		function drawWorld(){
+			var background_number = randomNumber(1,2);
+			console.log(background_number);
+			document.getElementById('ocean').style.backgroundImage = "url('./img/ocean" + background_number + ".jpg')";
+		}
+
 		function initEnemies(){
 			var num_enemies = randomNumber(1,4);
 			for (var i = 0; i < num_enemies; i++){
 				enemies.push({
 					name: "enemy" + (i + 1),
-					type: "enemy" + randomNumber(1,1),
+					type: "enemy" + randomNumber(1,2),
 					x: i,
 					y: 0
 				})
@@ -75,11 +104,11 @@
 			player.lives = 3;
 			heroes.push({
 				name: 'hero1',
-				type: 'hero',
+				type: 'hero2',
 				x: 0,
-				y: 6.5
+				y: 0
 			});
-			document.getElementById('player').innerHTML = "<div id = 'hero1' class = hero></div>";
+			document.getElementById('player').innerHTML = "<div id = 'hero1' class = " + heroes[0].type + "></div>";
 		}
 
 		function drawEnemies(){
@@ -89,17 +118,52 @@
 			}
 		}
 
-		function drawHero(){
+		function drawHeroes(){
 			for (var i = 0; i < heroes.length; i++){
 				document.getElementById('hero' + (i+1)).style.left = (heroes[i].x * 70) + "px";
-				document.getElementById('hero' + (i+1)).style.top = (heroes[i].y * 75) + "px";
+				document.getElementById('hero' + (i+1)).style.top = (487.5 - (heroes[i].y * 75)) + "px";
 			}
 		}
 
+		document.onkeydown = function(e){
+			// make the ninja walk
+			var moveDict = {
+				37: 'left',
+				38: 'up',
+				39: 'right',
+				40: 'down'
+			};
+
+			var dir = moveDict[e.keyCode];
+			console.log(dir);
+			
+			if (dir == 'left' || dir == 'right' || dir == 'up' || dir == 'down'){e.preventDefault();}
+			if (dir == 'left'){
+				for (var i = 0; i < heroes.length; i++){
+					heroes[i].x--;
+				}
+			} else if (dir == 'right'){
+				for (var i = 0; i < heroes.length; i++){
+					heroes[i].x++;
+				}
+			} else if (dir == 'up'){
+				for (var i = 0; i < heroes.length; i++){
+					heroes[i].y++;
+				}
+			} else if (dir == 'down'){
+				for (var i = 0; i < heroes.length; i++){
+					heroes[i].y--;
+				}
+			}
+
+			drawHeroes();
+		}
+
+		drawWorld();
 		initEnemies();
 		drawEnemies();
 		initPlayer();
-		drawHero();
+		drawHeroes();
 		console.log(enemies);
 	</script>	
 </body>
