@@ -1,20 +1,106 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title></title>
-</head>
-<body>
+	<title>Airplane!</title>
 	<style type="text/css">
-
+		body{
+			background-image: url('./img/ocean.jpg');
+			width:100%;
+			height:100%;
+		}
+		#ocean{
+			/* background-image: url('./img/ocean.jpg');
+			width: 100%;
+			height: 600px; */
+			display:inline-block;
+		}
+		.hero{
+			background-image: url('./img/player.png');
+			position:absolute;
+			width: 70px;
+			height: 75px;
+		}
+		.enemy1{
+			background-image: url('./img/enemy.png');
+			position: absolute;
+			width: 70px;
+			height: 75px;
+		}
 	</style>
 
+</head>
+<body>
 
-
-
+	<div id = 'ocean'>
+		<div id = 'player'></div>
+		<div id = 'enemies'></div>
+	</div>
 
 	<script type="text/javascript">
-	
+		function randomNumber(min, max){
+			var temp = Math.round(Math.random() * max)
+			if (temp < min){
+				temp = min;
+			};
+			return temp;
+		}
 
-	</script>
+		var player = {
+			lives: 0
+		}
+		var heroes = [];
+		
+		var enemies = [];
+
+		function initEnemies(){
+			var num_enemies = randomNumber(1,4);
+			for (var i = 0; i < num_enemies; i++){
+				enemies.push({
+					name: "enemy" + (i + 1),
+					type: "enemy" + randomNumber(1,1),
+					x: i,
+					y: 0
+				})
+			}
+
+			var output = "";
+			for (var i = 0; i < enemies.length; i++){
+				output += "<div id = " + enemies[i].name + " class = " + enemies[i].type + "></div>";
+				document.getElementById('enemies').innerHTML += output;
+				output = "";
+			}
+		}
+
+		function initPlayer(){
+			player.lives = 3;
+			heroes.push({
+				name: 'hero1',
+				type: 'hero',
+				x: 0,
+				y: 6.5
+			});
+			document.getElementById('player').innerHTML = "<div id = 'hero1' class = hero></div>";
+		}
+
+		function drawEnemies(){
+			for (var i = 0; i < enemies.length; i++){
+				document.getElementById('enemy' + (i+1)).style.left = (enemies[i].x * 70) + "px";
+				document.getElementById('enemy' + (i+1)).style.top = (enemies[i].y * 75) + "px";
+			}
+		}
+
+		function drawHero(){
+			for (var i = 0; i < heroes.length; i++){
+				document.getElementById('hero' + (i+1)).style.left = (heroes[i].x * 70) + "px";
+				document.getElementById('hero' + (i+1)).style.top = (heroes[i].y * 75) + "px";
+			}
+		}
+
+		initEnemies();
+		drawEnemies();
+		initPlayer();
+		drawHero();
+		console.log(enemies);
+	</script>	
 </body>
 </html>
