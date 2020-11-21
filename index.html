@@ -91,14 +91,15 @@
 
 		function initEnemies(){
 			var num_enemies = randomNumber(1,4);
+			var map_width = document.getElementById('ocean').clientWidth;
 			for (var i = 0; i < num_enemies; i++){
 				enemies.push({
 					name: "enemy" + (i + 1),
 					type: "enemy" + randomNumber(1,2),
-					x: i,
+					x: randomNumber(0, map_width / 70),
 					y: 0,
 					status: "fighting",
-					move_size: .25 * randomNumber(.5,1.5)
+					move_size: .25 * randomNumber(.25,1.25)
 				})
 			}
 
@@ -112,10 +113,11 @@
 
 		function initPlayer(){
 			player.lives = 3;
+			var map_width = document.getElementById('ocean').clientWidth;
 			heroes.push({
 				name: 'hero1',
 				type: 'hero2',
-				x: 0,
+				x: (map_width /  (2* 70)) - .5,
 				y: 0
 			});
 			document.getElementById('player').innerHTML = "<div id = 'hero1' class = " + heroes[0].type + "></div>";
