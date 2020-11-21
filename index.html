@@ -10,6 +10,7 @@
 		} */
 		#ocean{
 			background-image: url('./img/ocean.jpg');
+			background-size: cover;
 			width: 100%;
 			height: 600px;
 			display:inline-block;
@@ -130,7 +131,6 @@
 				for (var i = 0; i < enemies.length; i++){
 					e_width = document.getElementById(enemies[i].name).clientWidth;
 					e_height = document.getElementById(enemies[i].name).clientHeight;
-					console.log(e_width);
 					document.getElementById(enemies[i].name).style.left = (enemies[i].x * e_width) + "px";
 					document.getElementById(enemies[i].name).style.top = (enemies[i].y * e_height) + "px";
 				}
@@ -152,7 +152,6 @@
 			var m_size;
 			for (var i = 0; i < missiles.length; i++){
 				m_size = document.getElementById(missiles[i].name).clientHeight;
-				console.log(m_size);
 				document.getElementById(missiles[i].name).style.left = (missiles[i].x * 70) + (75/2) + "px";
 				document.getElementById(missiles[i].name).style.top = (500 - ((missiles[i].y * 75) - m_size)) + "px";
 			}
@@ -203,16 +202,22 @@
 			var move_size_x = .25;
 			var move_size_y = .25;
 			var dir = moveDict[e.keyCode];
+			var map_width = document.getElementById('ocean').clientWidth;
+			var h_width = document.getElementById('hero1').clientWidth;
 			
 			if (dir == 'left' || dir == 'right' || dir == 'up' || dir == 'down' || dir == 'shoot'){e.preventDefault();}
 			if (dir == 'left'){
-				if (heroes[0].x != 0){
+				if (heroes[0].x > .25){
 					for (var i = 0; i < heroes.length; i++){
 						heroes[i].x -= move_size_x;
 					}
 				}
 			} else if (dir == 'right'){
-				if (heroes[heroes.length - 1].x != Math.floor((screen.width) / 75)){
+				
+				if (heroes[heroes.length - 1].x < (map_width / h_width) - 1.25){
+					console.log(map_width);
+					console.log(h_width);
+					console.log(heroes[heroes.length -1].x);
 					for (var i = 0; i < heroes.length; i++){
 						heroes[i].x += move_size_x;
 					}
