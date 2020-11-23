@@ -100,7 +100,8 @@
 					x: randomNumber(0, map_width / 70),
 					y: 0,
 					status: "fighting",
-					move_size: .25 * randomNumber(.25,1.25)
+					move_size: .25 * randomNumber(.25,1.25),
+					health: 3
 				})
 			}
 
@@ -159,15 +160,16 @@
 
 		function moveEnemies(){
 			var replacement_array = [];
+			var map_width = document.getElementById("ocean").clientWidth;
 			for (var i = 0; i < enemies.length; i++){
 				// enemies[i].y += enemies[i].move_size;
 				enemies[i].y += enemies[i].move_size;
-				if (enemies[i].y >= (500/70) || enemies[i].status == "destroyed"){
-					enemies[i].status = "destroyed";
+				if (enemies[i].status == "destroyed"){
 					document.getElementById(enemies[i].name).remove();
-				} else if (enemies[i].status == "destroyed"){
-					console.print("ememy destroyed");
-					document.getElementById(enemies[i].name).remove();
+				} else if (enemies[i].y > (500/70)){
+					enemies[i].x = randomNumber(0,map_width/70);
+					enemies[i].y = -1;
+					replacement_array.push(enemies[i]);
 				} else {
 					replacement_array.push(enemies[i]);
 				}
@@ -194,12 +196,15 @@
 					console.log(enemy_y);
 					console.log(missile_y);
 					if (missile_y <= enemy_y && missile_x >= enemy_x && missile_x <= (enemy_x + 70)){
-						console.log("hit");
-						enemies[n].status = "destroyed";
+						enemies[n].health--;
+						if (enemies[n].health <= 0){
+							enemies[n].status = "destroyed";
+						}
+						missiles[i].status = "gone";
 					}
 				}
 
-				if (missiles[i].y > (500/75)){
+				if (missiles[i].y > (500/75) || missiles[i].status == "gone"){
 					missiles[i].status = "gone";
 					document.getElementById(missiles[i].name).remove();
 				} else {
