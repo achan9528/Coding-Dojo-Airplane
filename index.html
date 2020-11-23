@@ -162,8 +162,11 @@
 			for (var i = 0; i < enemies.length; i++){
 				// enemies[i].y += enemies[i].move_size;
 				enemies[i].y += enemies[i].move_size;
-				if (enemies[i].y >= (500/70)){
+				if (enemies[i].y >= (500/70) || enemies[i].status == "destroyed"){
 					enemies[i].status = "destroyed";
+					document.getElementById(enemies[i].name).remove();
+				} else if (enemies[i].status == "destroyed"){
+					console.print("ememy destroyed");
 					document.getElementById(enemies[i].name).remove();
 				} else {
 					replacement_array.push(enemies[i]);
@@ -175,8 +178,27 @@
 		function moveMissiles(){
 			var replacement_array = [];
 			for (var i = 0; i < missiles.length; i++){
-				// enemies[i].y += enemies[i].move_size;
 				missiles[i].y += missiles[i].move_size;
+
+				for (var n = 0; n < enemies.length; n++){
+					var a1 = document.getElementById(enemies[n].name).style.left;
+					var b1 = document.getElementById(enemies[n].name).style.top;
+					var enemy_x = parseInt(a1.substring(0,a1.length - 2));
+					var enemy_y = parseInt(b1.substring(0,b1.length - 2)) + 75;
+					
+					var a2 = document.getElementById(missiles[i].name).style.left;
+					var b2 = document.getElementById(missiles[i].name).style.top;
+					var missile_x = parseInt(a2.substring(0,a2.length - 2));
+					var missile_y = parseInt(b2.substring(0,b2.length - 2));
+
+					console.log(enemy_y);
+					console.log(missile_y);
+					if (missile_y <= enemy_y && missile_x >= enemy_x && missile_x <= (enemy_x + 70)){
+						console.log("hit");
+						enemies[n].status = "destroyed";
+					}
+				}
+
 				if (missiles[i].y > (500/75)){
 					missiles[i].status = "gone";
 					document.getElementById(missiles[i].name).remove();
@@ -215,9 +237,7 @@
 			} else if (dir == 'right'){
 				
 				if (heroes[heroes.length - 1].x < (map_width / h_width) - 1.25){
-					console.log(map_width);
-					console.log(h_width);
-					console.log(heroes[heroes.length -1].x);
+					
 					for (var i = 0; i < heroes.length; i++){
 						heroes[i].x += move_size_x;
 					}
@@ -253,10 +273,10 @@
 		}
 
 		function gameLoop(){
-			moveEnemies();
-			drawEnemies();
 			moveMissiles();
 			drawMissiles();
+			moveEnemies();
+			drawEnemies()
 			setTimeout(gameLoop, 100);
 		}
 
