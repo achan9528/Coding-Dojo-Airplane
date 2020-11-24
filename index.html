@@ -11,12 +11,25 @@
 		#ocean{
 			background-image: url('./img/ocean.jpg');
 			background-size: cover;
+			background-repeat: repeat;
 			width: 100%;
-			height: 600px;
+			height: 100%;
 			display:inline-block;
 			left: 0px;
 			top: 0px;
 			position:absolute;
+		}
+		#gameOver{
+			top: 0px;
+			left: 0px;
+			width: 100%;
+			height: 500px;
+			border-style: double;
+			border-color: red;
+			text-align: center;
+			padding: 250px 0;
+			position: absolute;
+			visibility: hidden;
 		}
 		.hero1{
 			background-image: url('./img/player1.png');
@@ -65,6 +78,9 @@
 		<div id = 'player'></div>
 		<div id = 'missiles'></div>
 		<div id = 'enemies'></div>
+		<div id = 'gameOver'>
+			<h1>Game Over!</h1>
+		</div>
 	</div>
 
 	<script type="text/javascript">
@@ -85,13 +101,15 @@
 
 		var missiles = [];
 
+		var game_over = false;
+
 		function drawWorld(){
 			var background_number = randomNumber(1,2);
 			document.getElementById('ocean').style.backgroundImage = "url('./img/ocean" + background_number + ".jpg')";
 		}
 
 		function initEnemies(){
-			var num_enemies = randomNumber(1,4);
+			var num_enemies = randomNumber(1,10);
 			var map_width = document.getElementById('ocean').clientWidth;
 			for (var i = 0; i < num_enemies; i++){
 				enemies.push({
@@ -120,7 +138,9 @@
 				name: 'hero1',
 				type: 'hero2',
 				x: (map_width /  (2* 70)) - .5,
-				y: 0
+				y: 0,
+				health: 1,
+				status: "fighting"
 			});
 			document.getElementById('player').innerHTML = "<div id = 'hero1' class = " + heroes[0].type + "></div>";
 		}
@@ -141,6 +161,7 @@
 		function drawHeroes(){
 			var h_width;
 			var h_height;
+			var map_height = document.getElementById("ocean").clientHeight
 			for (var i = 0; i < heroes.length; i++){
 				h_width = document.getElementById(heroes[i].name).clientWidth;
 				h_height = document.getElementById(heroes[i].name).clientHeight;
@@ -161,12 +182,47 @@
 		function moveEnemies(){
 			var replacement_array = [];
 			var map_width = document.getElementById("ocean").clientWidth;
+			var map_height = document.getElementById("ocean").clientHeight;
 			for (var i = 0; i < enemies.length; i++){
 				// enemies[i].y += enemies[i].move_size;
+
 				enemies[i].y += enemies[i].move_size;
+
+				for (var n = 0; n < heroes.length; n++){
+					var a1 = document.getElementById(heroes[n].name).style.left;
+					var b1 = document.getElementById(heroes[n].name).style.top;
+					var hero_x = parseInt(a1.substring(0,a1.length - 2));
+					var hero_y = parseInt(b1.substring(0,b1.length - 2));
+					
+					var a2 = document.getElementById(enemies[i].name).style.left;
+					var b2 = document.getElementById(enemies[i].name).style.top;
+					var enemy_x = parseInt(a2.substring(0,a2.length - 2));
+					var enemy_y = parseInt(b2.substring(0,b2.length - 2)) + 75;
+
+					console.log("Enemy:" + enemy_x);
+					console.log("Enemy upper:" + (enemy_x + 70));
+					console.log("Hero lower: " + hero_x);
+					console.log("Hero upper: " + (hero_x + 75));
+
+					// left most point has to be greater than the left most point of the hero
+					// left most point has to be less than the right most point of the hero
+
+					// left most point has to be greater than 2x greater than the left most point of the hero
+					
+					if (enemy_y > hero_y && enemy_x > (hero_x - 70) && enemy_x < (hero_x + 65))
+					{
+						heroes[n].health--;
+						if (heroes[n].health <= 0){
+							heroes[n].status = "destroyed";
+						}
+						console.log(enemy_y);
+						enemies[i].status = "destroyed";
+					}
+				}
+
 				if (enemies[i].status == "destroyed"){
 					document.getElementById(enemies[i].name).remove();
-				} else if (enemies[i].y > (500/70)){
+				} else if (enemies[i].y > (map_height/75)){
 					enemies[i].x = randomNumber(0,map_width/70);
 					enemies[i].y = -1;
 					replacement_array.push(enemies[i]);
@@ -175,6 +231,21 @@
 				}
 			}
 			enemies = replacement_array;
+			drawEnemies();
+
+			replacement_array = [];
+			for (var i = 0; i < heroes.length; i++){
+				console.log(heroes[i].name + ":" + heroes[i].status);
+				if (heroes[i].status == "fighting"){
+					replacement_array.push(heroes[i]);
+				} else {
+					document.getElementById(heroes[i].name).remove();
+				}
+			}
+			heroes = replacement_array;
+			if (heroes.length == 0){
+				game_over=true;
+			}
 		}
 
 		function moveMissiles(){
@@ -213,8 +284,12 @@
 			}
 
 			missiles = replacement_array;
+			drawMissiles();
 		}
 
+		function gameOver(){
+			document.getElementById("gameOver").style.visibility = "visible";
+		}
 
 		document.onkeydown = function(e){
 			// make the ninja walk
@@ -281,8 +356,12 @@
 			moveMissiles();
 			drawMissiles();
 			moveEnemies();
-			drawEnemies()
-			setTimeout(gameLoop, 100);
+			drawEnemies();
+			if (game_over){
+				gameOver()
+			} else {
+				setTimeout(gameLoop, 100);
+			}
 		}
 
 		drawWorld();
