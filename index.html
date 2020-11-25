@@ -69,6 +69,12 @@
 			height: 10px;
 			position: absolute;
 		}
+		.enemyMissile1{
+			background-color: white;
+			width: 2.5px;
+			height: 10px;
+			position: absolute;
+		}
 	</style>
 
 </head>
@@ -78,6 +84,7 @@
 		<div id = 'player'></div>
 		<div id = 'missiles'></div>
 		<div id = 'enemies'></div>
+		<!-- <div id = 'enemyMissiles'></div> -->
 		<div id = 'gameOver'>
 			<h1>Game Over!</h1>
 		</div>
@@ -109,7 +116,7 @@
 		}
 
 		function initEnemies(){
-			var num_enemies = randomNumber(1,10);
+			var num_enemies = randomNumber(1,5);
 			var map_width = document.getElementById('ocean').clientWidth;
 			for (var i = 0; i < num_enemies; i++){
 				enemies.push({
@@ -119,7 +126,8 @@
 					y: 0,
 					status: "fighting",
 					move_size: .25 * randomNumber(.25,1.25),
-					health: 3
+					health: 3,
+					missiles: []
 				})
 			}
 
@@ -287,6 +295,42 @@
 			drawMissiles();
 		}
 
+		function shootEnemyMissiles(){
+			// loop through enemy list
+			for (var i = 0; i < enemies.length; i++){
+				var shoot = randomNumber(1,50);
+				if (shoot == 1){
+					enemies[i].missiles.push({
+						name: enemies[i].name + "-missile" + (enemies[i].missiles.length + 1),
+						type: "enemyMissile1",
+						x: enemies[i].x + (70/2) - 5,
+						y: enemies[i].y + (70),
+						move_size: enemies[i].move_size + .50,
+					})
+					var output = "<div id = " + enemies[i].name + "-missile" + (enemies[i].missiles.length) + " class = 'enemyMissile1'></div>";
+					document.getElementById(enemies[i].name).innerHTML += output;
+				}
+			}
+			
+		}
+
+		function moveEnemyMissiles(){
+			var replacement_array = [];
+			var map_height = document.getElementById("ocean").clientHeight;
+			for (var i = 0; i < enemies.length; i++){
+				for (var n = 0; n < enemies[i].missiles.length; n++){
+					enemies[i].missiles[n].y += enemies[i].missiles[n].move_size;
+					if (enemies[i].missiles[n].y < map_height){
+						replacement_array.push(enemies[i].missiles[n]);
+						document.getElementById(enemies[i].missiles[n].name).style.left = enemies[i].missiles[n].x + "px";
+						document.getElementById(enemies[i].missiles[n].name).style.top = enemies[i].missiles[n].y + "px";
+					}
+				}
+				enemies[i].missiles = replacement_array;
+			}
+		}
+
+
 		function gameOver(){
 			document.getElementById("gameOver").style.visibility = "visible";
 		}
@@ -356,7 +400,9 @@
 			moveMissiles();
 			drawMissiles();
 			moveEnemies();
+			shootEnemyMissiles();
 			drawEnemies();
+			moveEnemyMissiles();
 			if (game_over){
 				gameOver()
 			} else {
