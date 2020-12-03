@@ -84,7 +84,7 @@
 		<div id = 'player'></div>
 		<div id = 'missiles'></div>
 		<div id = 'enemies'></div>
-		<!-- <div id = 'enemyMissiles'></div> -->
+		<div id = 'enemyMissiles'></div>
 		<div id = 'gameOver'>
 			<h1>Game Over!</h1>
 		</div>
@@ -108,6 +108,8 @@
 
 		var missiles = [];
 
+		var enemyMissiles = [];
+
 		var game_over = false;
 
 		function drawWorld(){
@@ -116,7 +118,7 @@
 		}
 
 		function initEnemies(){
-			var num_enemies = randomNumber(1,5);
+			var num_enemies = randomNumber(1,1);
 			var map_width = document.getElementById('ocean').clientWidth;
 			for (var i = 0; i < num_enemies; i++){
 				enemies.push({
@@ -125,9 +127,9 @@
 					x: randomNumber(0, map_width / 70),
 					y: 0,
 					status: "fighting",
-					move_size: .25 * randomNumber(.25,1.25),
-					health: 3,
-					missiles: []
+					move_size: .25 * randomNumber(.25,.25),
+					// move_size: .25 * randomNumber(.25,1.25),
+					health: 3
 				})
 			}
 
@@ -145,7 +147,7 @@
 			heroes.push({
 				name: 'hero1',
 				type: 'hero2',
-				x: (map_width /  (2* 70)) - .5,
+				x: (map_width /  (70*2)) - .5,
 				y: 0,
 				health: 1,
 				status: "fighting"
@@ -207,11 +209,6 @@
 					var enemy_x = parseInt(a2.substring(0,a2.length - 2));
 					var enemy_y = parseInt(b2.substring(0,b2.length - 2)) + 75;
 
-					console.log("Enemy:" + enemy_x);
-					console.log("Enemy upper:" + (enemy_x + 70));
-					console.log("Hero lower: " + hero_x);
-					console.log("Hero upper: " + (hero_x + 75));
-
 					// left most point has to be greater than the left most point of the hero
 					// left most point has to be less than the right most point of the hero
 
@@ -223,7 +220,6 @@
 						if (heroes[n].health <= 0){
 							heroes[n].status = "destroyed";
 						}
-						console.log(enemy_y);
 						enemies[i].status = "destroyed";
 					}
 				}
@@ -243,7 +239,6 @@
 
 			replacement_array = [];
 			for (var i = 0; i < heroes.length; i++){
-				console.log(heroes[i].name + ":" + heroes[i].status);
 				if (heroes[i].status == "fighting"){
 					replacement_array.push(heroes[i]);
 				} else {
@@ -272,8 +267,6 @@
 					var missile_x = parseInt(a2.substring(0,a2.length - 2));
 					var missile_y = parseInt(b2.substring(0,b2.length - 2));
 
-					console.log(enemy_y);
-					console.log(missile_y);
 					if (missile_y <= enemy_y && missile_x >= enemy_x && missile_x <= (enemy_x + 70)){
 						enemies[n].health--;
 						if (enemies[n].health <= 0){
@@ -295,38 +288,69 @@
 			drawMissiles();
 		}
 
+		var shoot = 1;
 		function shootEnemyMissiles(){
 			// loop through enemy list
 			for (var i = 0; i < enemies.length; i++){
-				var shoot = randomNumber(1,50);
+				// var shoot = randomNumber(1,2);
 				if (shoot == 1){
-					enemies[i].missiles.push({
-						name: enemies[i].name + "-missile" + (enemies[i].missiles.length + 1),
+					enemyMissiles.push({
+						name: enemies[i].name + "-missile" + (enemyMissiles.length + 1),
 						type: "enemyMissile1",
-						x: enemies[i].x + (70/2) - 5,
-						y: enemies[i].y + (70),
+						x: enemies[i].x + .5,
+						y: enemies[i].y + 1,
+						// move_size: enemies[i].move_size,
 						move_size: enemies[i].move_size + .50,
+						status: "shot",
 					})
-					var output = "<div id = " + enemies[i].name + "-missile" + (enemies[i].missiles.length) + " class = 'enemyMissile1'></div>";
-					document.getElementById(enemies[i].name).innerHTML += output;
+					var output = "<div id = " + enemies[i].name + "-missile" + (enemyMissiles.length) + " class = 'enemyMissile1'></div>";
+					document.getElementById("enemyMissiles").innerHTML += output;
+					shoot--;
 				}
 			}
-			
 		}
 
 		function moveEnemyMissiles(){
 			var replacement_array = [];
+			var replacement_array2 = [];
 			var map_height = document.getElementById("ocean").clientHeight;
-			for (var i = 0; i < enemies.length; i++){
-				for (var n = 0; n < enemies[i].missiles.length; n++){
-					enemies[i].missiles[n].y += enemies[i].missiles[n].move_size;
-					if (enemies[i].missiles[n].y < map_height){
-						replacement_array.push(enemies[i].missiles[n]);
-						document.getElementById(enemies[i].missiles[n].name).style.left = enemies[i].missiles[n].x + "px";
-						document.getElementById(enemies[i].missiles[n].name).style.top = enemies[i].missiles[n].y + "px";
-					}
+			for (var n = 0; n < heroes.length; n++){
+				for (var i = 0; i < enemyMissiles.length; i++){
+					enemyMissiles[i].y += enemyMissiles[i].move_size;
+					var missile_x = enemyMissiles[i].x;
+					var missile_y = enemyMissiles[i].y;
+					var hero_x = heroes[n].x;
+					var hero_y = (500/70) - heroes[n].y;
+
+					// console.log("Hero x:" + hero_x);
+					// console.log("Enemy x:" + missile_x);
+					// console.log("Hero y:" + hero_y);
+					// console.log("Enemy y:" + missile_y);
+
+					if (missile_x >= hero_x && missile_x <= (hero_x + 1) && missile_y >= hero_y && missile_y <= (hero_y + 1)){
+						console.log("hit");						
+						heroes[n].health--;
+						if (heroes[n].health == 0){
+							document.getElementById(heroes[n].name).remove();
+							if (heroes.length == 1){
+								game_over = true;
+							}
+						} 
+						document.getElementById(enemyMissiles[i].name).remove();
+					} else if (enemyMissiles[i].y < map_height){
+						replacement_array.push(enemyMissiles[i]);
+					} 
 				}
-				enemies[i].missiles = replacement_array;
+			}
+			enemyMissiles = replacement_array;
+			// heroes = replacement_array2;
+			
+		}
+
+		function drawEnemyMissiles(){
+			for (var i = 0; i < enemyMissiles.length; i++){
+				document.getElementById(enemyMissiles[i].name).style.left = (enemyMissiles[i].x * 70) + "px";
+				document.getElementById(enemyMissiles[i].name).style.top = (enemyMissiles[i].y * 70) + "px";
 			}
 		}
 
@@ -398,11 +422,14 @@
 
 		function gameLoop(){
 			moveMissiles();
-			drawMissiles();
 			moveEnemies();
 			shootEnemyMissiles();
-			drawEnemies();
 			moveEnemyMissiles();
+
+			drawMissiles();
+			drawEnemies();
+			drawEnemyMissiles();
+
 			if (game_over){
 				gameOver()
 			} else {
